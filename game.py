@@ -7,8 +7,8 @@ from play import Play
 
 BOARD_PROTOTYPE = []
 PLAYERS_PROTOTYPE = {}
-NUM_CARDS = 14
-CARDS_PER_PLAYER = 6
+NUM_CARDS = 8
+CARDS_PER_PLAYER = 3
 BRICK_CARDS = 2
 BRICK_PREREQ = 5
 MONEY_CARDS = 1
@@ -20,23 +20,26 @@ class Game():
     def start(self):
         new_board = copy.copy(BOARD_PROTOTYPE)
         players = copy.copy(PLAYERS_PROTOTYPE)
+        deck = []
         card_id = 0
         for j in range(BRICK_CARDS):
-            new_board.append(Card(card_id, points=0, prereq=None, symbol='B',color='brown'))
+            deck.append(Card(card_id, points=0, prereq=None, symbol='B',color='brown'))
             card_id += 1  # TODO: make this better
         for j in range(BRICK_PREREQ):
-            new_board.append(Card(card_id, points=random.randint(10, 20), prereq='B', symbol=None,color='blue'))
+            deck.append(Card(card_id, points=random.randint(10, 20), prereq='B', symbol=None,color='blue'))
             card_id += 1  # TODO: make this better
         for j in range(MONEY_CARDS):
-            new_board.append(Card(card_id, points=0, prereq=None, symbol='$',color='yellow'))
+            deck.append(Card(card_id, points=0, prereq=None, symbol='$',color='yellow'))
             card_id += 1  # TODO: make this better
-        while len(new_board) < NUM_CARDS:
-            new_board.append(Card(card_id, points=random.randint(0, 15), prereq=None, symbol=None,color='yellow'))
+        while len(deck) < NUM_CARDS:
+            deck.append(Card(card_id, points=random.randint(0, 15), prereq=None, symbol=None,color='yellow'))
             card_id += 1 #TODO: make this better
         players[1] = Player(1)
         players[-1] = Player(-1)
-
-        return State([], new_board, 1, players)
+        deck = random.sample(deck, k=len(deck))
+        for i in range(4):
+            new_board.append(deck.pop())
+        return State([], new_board, 1, players, deck)
 
     def legal_plays(self, state):
         legal_plays = []
@@ -52,6 +55,7 @@ class Game():
 
     def next_state(self, state, play):
         new_history = copy.deepcopy(state.play_history) #deepcopy?
+        new_deck = copy.deepcopy(state.deck)
         new_history.append(play.to_JSON())
         new_board = copy.deepcopy(state.board)
         for card in new_board:
@@ -70,7 +74,9 @@ class Game():
         elif play.type == "buy":
             new_players[player_id].cards.append(play.card)
             new_players[player_id].money -= 2
-        next_state = State(new_history, new_board, new_player, new_players)
+        if len(new_deck) > 0:
+            new_board.append(new_deck.pop())
+        next_state = State(new_history, new_board, new_player, new_players, new_deck)
         return next_state
 
     def winner(self, state):

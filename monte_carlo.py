@@ -24,7 +24,8 @@ class MonteCarlo():
         end = datetime.datetime.now() + datetime.timedelta(milliseconds=timeout * 1000)
 
         while datetime.datetime.now() < end:
-            node = self.select(state)
+            simulated_state = state.clone_and_randomize()
+            node = self.select(simulated_state)
             winner = self.game.winner(node.state)
 
             if not node.is_leaf() and winner is None:
