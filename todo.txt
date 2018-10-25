@@ -1,0 +1,6 @@
+-blockers
+-reds
+-greens
+-wonders
+-$ costs
+-purples
