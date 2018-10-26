@@ -18,11 +18,4 @@
     </entry>
   </component>
   <component name="ProjectRootManager" version="2" project-jdk-name="Python 3.5.2 (C:\Users\Luke\Anaconda3\python.exe)" project-jdk-type="Python SDK" />
-  <component name="PyConsoleOptionsProvider">
-    <option name="myPythonConsoleState">
-      <console-settings sdk-home="C:\Users\Luke\Anaconda3\python.exe">
-        <option name="mySdkHome" value="C:\Users\Luke\Anaconda3\python.exe" />
-      </console-settings>
-    </option>
-  </component>
 </project>

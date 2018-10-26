@@ -2,11 +2,33 @@
 
 from pprint import pprint
 from game import Game
-from monte_carlo import MonteCarlo
+from player import Player
+from random_player import RandomPlayer
+from monte_carlo_player import MonteCarloPlayer
 
 # Setup
 
-game = Game()
+player_1 = MonteCarloPlayer(0)
+player_2 = MonteCarloPlayer(1)
+players = [player_1, player_2]
+game = Game(players)
+for player in players:
+    player.set_game(game)
+game.set_up()
+game.start()
+
+while not game.is_over():
+    pprint(game.board)
+    cur_player = game.get_current_player()
+    move = cur_player.move()
+    print(move)
+    game.do_move(move)
+
+winner = game.get_winner()
+pprint(game.players)
+print("winner: {0}".format(winner))
+
+'''
 mcts = MonteCarlo(game)
 
 
@@ -35,3 +57,4 @@ while (winner is None):
 
 print("winner: {0}".format(1 if winner == 1 else 2))
 pprint(state.players)
+'''
