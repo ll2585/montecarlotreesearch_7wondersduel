@@ -4,11 +4,53 @@ import copy
 import math
 import random
 
+from is_monte_carlo_node import Node
+
 class MonteCarlo():
     def __init__(self, game, ucb1_explore_param = 2):
         self.game = game
         self.ucb1_explore_param = ucb1_explore_param
         self.nodes = {}
+
+    def get_move(self):
+        root_state = self.game.get_state()
+        current_player_id = root_state.current_player_id
+        rootnode = Node()
+        print("----")
+        #for i in range(1000):
+        timeout = 1
+        end = datetime.datetime.now() + datetime.timedelta(milliseconds=timeout * 1000)
+
+        while datetime.datetime.now() < end:
+            node = rootnode
+            state = root_state.clone_and_randomize(current_player_id)
+
+            simulated_game = self.game.new_game_from_state(state)
+            #print(simulated_game.get_possible_moves())
+            while simulated_game.get_possible_moves() != [] and node.GetUntriedMoves(simulated_game.get_possible_moves()) == []:
+                node = node.UCBSelectChild(simulated_game.get_possible_moves())
+                simulated_game.do_move(node.move)
+
+            #expand
+            untried_moves = node.GetUntriedMoves(simulated_game.get_possible_moves())
+            #print(untried_moves)
+            if untried_moves != []:  # if we can expand (i.e. state/node is non-terminal)
+                m = random.choice(untried_moves)
+                player = simulated_game.get_current_player_id()
+                simulated_game.do_move(m)
+                node = node.AddChild(m, player)  # add child and descend tree
+
+            # Simulate
+            while simulated_game.get_possible_moves() != []:  # while state is non-terminal
+                simulated_game.do_move(random.choice(simulated_game.get_possible_moves()))
+
+            while node != None:  # backpropagate from the expanded node and work back to the root node
+                node.Update(simulated_game)
+                node = node.parentNode
+
+        print(rootnode.ChildrenToString())
+
+        return max(rootnode.childNodes, key=lambda c: c.visits).move  # return the move that was most visited
 
     def make_node(self, state):
         if not state.hash() in self.nodes:
@@ -25,6 +67,7 @@ class MonteCarlo():
 
         while datetime.datetime.now() < end:
             simulated_state = state.clone_and_randomize()
+            self.make_node(simulated_state)
             node = self.select(simulated_state)
             winner = self.game.winner(node.state)
 
