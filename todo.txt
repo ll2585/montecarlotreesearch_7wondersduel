@@ -1,6 +1,18 @@
--blockers
--reds
--greens
--wonders
--$ costs
+-age2 no yellows
+-age2 trading post
+-chains
+-age3 no purples
+-wonders no weird actions
 -purples
+-age 3 yellows
+-weird actions - lose coins
+-military lose coins
+-military points
+-choose who to go first next age
+-weird actions second turn
+-weird actions zombie
+-weird actions kill brown/gray card
+-science tokens
+-library tokens
+-choosing wonders??
+DONE???

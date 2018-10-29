@@ -18,7 +18,7 @@ class MonteCarlo():
         rootnode = Node()
         print("----")
         #for i in range(1000):
-        timeout = 1
+        timeout = .1
         end = datetime.datetime.now() + datetime.timedelta(milliseconds=timeout * 1000)
 
         while datetime.datetime.now() < end:
@@ -34,6 +34,7 @@ class MonteCarlo():
             #expand
             untried_moves = node.GetUntriedMoves(simulated_game.get_possible_moves())
             #print(untried_moves)
+
             if untried_moves != []:  # if we can expand (i.e. state/node is non-terminal)
                 m = random.choice(untried_moves)
                 player = simulated_game.get_current_player_id()
@@ -41,8 +42,10 @@ class MonteCarlo():
                 node = node.AddChild(m, player)  # add child and descend tree
 
             # Simulate
+
             while simulated_game.get_possible_moves() != []:  # while state is non-terminal
-                simulated_game.do_move(random.choice(simulated_game.get_possible_moves()))
+                random_move = random.choice(simulated_game.get_possible_moves())
+                simulated_game.do_move(random_move)
 
             while node != None:  # backpropagate from the expanded node and work back to the root node
                 node.Update(simulated_game)
