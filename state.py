@@ -5,7 +5,7 @@ from cards import AGE_1_CARDS
 
 class State:
     def __init__(self, play_history, board, current_player_id, players, deck, seen_and_played_card_ids, cur_age, picking_who_to_start, discarded_cards,
-                 zombieing, killing_card, choosing_science, science_tokens_to_choose, science_tokens):
+                 zombieing, killing_card, choosing_science, science_tokens_to_choose, science_tokens, unused_science_tokens):
         self.play_history = play_history
         self.board = board
         self.current_player_id = current_player_id
@@ -20,6 +20,7 @@ class State:
         self.choosing_science = choosing_science
         self.science_tokens_to_choose = science_tokens_to_choose
         self.science_tokens = science_tokens
+        self.unused_science_tokens = unused_science_tokens
 
     def is_player(self, player):
         return self.current_player_id == player

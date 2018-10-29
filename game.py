@@ -31,6 +31,7 @@ class Game():
         self.killing_card = None
         self.choosing_science = False
         self.science_tokens_to_choose = None
+        self.unused_science_tokens = []
         self.science_tokens = []
         self.discarded_cards = []
 
@@ -51,7 +52,8 @@ class Game():
                 self.players[1].add_wonder(wonders[i])
         tokens = copy.deepcopy(SCIENCE_TOKENS)
         random.shuffle(tokens)
-        self.science_tokens = random.sample(tokens, 5)
+        self.science_tokens = tokens[:5]
+        self.unused_science_tokens = tokens[5:]
         self.deal_board(self.cur_age)
         self.current_player = self.players[0]
 
@@ -64,7 +66,8 @@ class Game():
                      copy.deepcopy(self.killing_card),
                      copy.deepcopy(self.choosing_science),
                      copy.deepcopy(self.science_tokens_to_choose),
-                     copy.deepcopy(self.science_tokens))
+                     copy.deepcopy(self.science_tokens),
+                     copy.deepcopy(self.unused_science_tokens))
 
     def get_current_player(self):
         return self.current_player
@@ -142,6 +145,7 @@ class Game():
         self.choosing_science = state.choosing_science
         self.science_tokens_to_choose = state.science_tokens_to_choose
         self.science_tokens = state.science_tokens
+        self.unused_science_tokens = state.unused_science_tokens
 
         for player in self.players:
             if player.get_id() == state.current_player_id:
@@ -226,10 +230,14 @@ class Game():
                         break
                 self.current_player.play_card(play.card,zombie=True)
                 self.zombieing = False
+                if self.current_player.has_token(8):
+                    go_again = True
             elif play.type == 'kill':
                 self.discarded_cards.append(play.card)
                 self.current_player.opponent.discard_card(play.card)
                 self.killing_card = None
+                if self.current_player.has_token(8):
+                    go_again = True
             else:
                 raise Exception("Wrong play")
 
@@ -244,15 +252,21 @@ class Game():
                     if 'zombie' in play.wonder.symbols:
                         self.zombieing = True
                         go_again = True
+                    if 'science' in play.wonder.symbols:
+                        self.current_player.built_library()
+                        go_again = True
                     if 'kill' in play.wonder.symbols:
                         self.killing_card = play.wonder.symbol_additional_info[0]
                         if self.current_player.opponent.get_num_color_cards(self.killing_card) > 0:
                             go_again = True
                         else:
                             self.killing_card = None
-            if self.current_player.choose_science and len(self.science_tokens) > 0:
+            if self.current_player.choose_science and (len(self.science_tokens) > 0 or self.current_player.choose_library_science):
                 go_again = True
-                self.science_tokens_to_choose = self.science_tokens
+                if self.current_player.choose_library_science:
+                    self.science_tokens_to_choose = self.unused_science_tokens
+                else:
+                    self.science_tokens_to_choose = self.science_tokens
                 self.choosing_science = True
             elif self.age_over():
                 self.cur_age += 1
