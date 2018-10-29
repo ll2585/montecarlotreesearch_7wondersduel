@@ -9,8 +9,10 @@ from monte_carlo_player import MonteCarloPlayer
 # Setup
 
 player_1 = MonteCarloPlayer(0)
-player_2 = MonteCarloPlayer(1)
+player_2 = RandomPlayer(1)
 players = [player_1, player_2]
+player_1.set_opponent(player_2)
+player_2.set_opponent(player_1)
 game = Game(players)
 for player in players:
     player.set_game(game)
@@ -19,15 +21,17 @@ game.start()
 
 while not game.is_over():
     pprint(game.board)
+    print(game.science_tokens)
     cur_player = game.get_current_player()
     move = cur_player.move()
     print(move)
     game.do_move(move)
+    print([card.name for card in game.discarded_cards])
+    pprint(game.players)
 
 winner = game.get_winner()
-pprint(game.players)
 print("winner: {0}".format(winner))
-
+pprint(game.players)
 '''
 mcts = MonteCarlo(game)
 
