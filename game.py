@@ -31,7 +31,6 @@ class Game():
         self.killing_card = None
         self.choosing_science = False
         self.science_tokens_to_choose = None
-        self.unused_science_tokens = []
         self.science_tokens = []
         self.discarded_cards = []
 
@@ -53,7 +52,6 @@ class Game():
         tokens = copy.deepcopy(SCIENCE_TOKENS)
         random.shuffle(tokens)
         self.science_tokens = tokens[:5]
-        self.unused_science_tokens = tokens[5:]
         self.deal_board(self.cur_age)
         self.current_player = self.players[0]
 
@@ -66,8 +64,7 @@ class Game():
                      copy.deepcopy(self.killing_card),
                      copy.deepcopy(self.choosing_science),
                      copy.deepcopy(self.science_tokens_to_choose),
-                     copy.deepcopy(self.science_tokens),
-                     copy.deepcopy(self.unused_science_tokens))
+                     copy.deepcopy(self.science_tokens))
 
     def get_current_player(self):
         return self.current_player
@@ -106,7 +103,7 @@ class Game():
                     legal_plays.append(Play(cur_player_id, card, type="play"))
                 elif self.current_player.can_buy_card(card):
                     legal_plays.append(Play(cur_player_id, card, type="buy"))
-                if self.players[0].get_built_wonder_count() + self.players[1].get_built_wonder_count()  < 7:
+                if self.players[0].get_built_wonder_count() + self.players[1].get_built_wonder_count() < 7:
                     for wonder in self.current_player.get_wonders():
                         if self.current_player.can_build_card(wonder):
                             legal_plays.append(Play(cur_player_id, card, type="build_wonder", wonder=wonder))
@@ -145,7 +142,6 @@ class Game():
         self.choosing_science = state.choosing_science
         self.science_tokens_to_choose = state.science_tokens_to_choose
         self.science_tokens = state.science_tokens
-        self.unused_science_tokens = state.unused_science_tokens
 
         for player in self.players:
             if player.get_id() == state.current_player_id:
@@ -249,7 +245,7 @@ class Game():
                 if play.wonder.symbols is not None:
                     if 2 in play.wonder.symbols:
                         go_again = True
-                    if 'zombie' in play.wonder.symbols:
+                    if 'zombie' in play.wonder.symbols and len(self.discarded_cards) > 0:
                         self.zombieing = True
                         go_again = True
                     if 'science' in play.wonder.symbols:
@@ -264,7 +260,12 @@ class Game():
             if self.current_player.choose_science and (len(self.science_tokens) > 0 or self.current_player.choose_library_science):
                 go_again = True
                 if self.current_player.choose_library_science:
-                    self.science_tokens_to_choose = self.unused_science_tokens
+                    unused_science_tokens = []
+                    used_science_tokens = [token.token_id for token in self.science_tokens]
+                    for token in SCIENCE_TOKENS:
+                        if token.token_id not in used_science_tokens:
+                            unused_science_tokens.append(token)
+                    self.science_tokens_to_choose = random.sample(unused_science_tokens, 3)
                 else:
                     self.science_tokens_to_choose = self.science_tokens
                 self.choosing_science = True
@@ -320,6 +321,8 @@ class Game():
         return None
 
     def get_military_winner(self):
+        if len(self.players[0].cards) > 0 or self.current_player == self.players[1]:
+            return self.players[0].get_id()
         if self.players[0].get_military() - self.players[1].get_military() >= MILITARY_DIFFERENCE_VICTORY:
             return self.players[0].get_id()
         if self.players[1].get_military() - self.players[0].get_military() >= MILITARY_DIFFERENCE_VICTORY:

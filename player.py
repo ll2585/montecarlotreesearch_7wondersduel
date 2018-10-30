@@ -16,6 +16,7 @@ class Player:
         self.science_tokens = []
         self.science_symbols = {}
         self.choose_science = False
+        self.choose_library_science = False
 
     def set_game(self, game):
         self.game = game
@@ -27,6 +28,7 @@ class Player:
         if token.token_id == 3:
             self.add_science_symbol("L")
         self.choose_science = False
+        self.choose_library_science = False
 
     def has_token(self, token_id):
         for token in self.science_tokens:
@@ -108,13 +110,12 @@ class Player:
                 self.money += max(opponent_card_num, my_card_num)
         if card.color == 'green':
             self.add_science_symbol(card.symbols[0])
-            if self.science_symbols[card.symbols[0]] == 1:
+            if self.science_symbols[card.symbols[0]] == 2:
                 self.choose_science = True
         if not zombie and self.has_token(9):
             if card.chain_prereq is not None:
                 for c in self.cards:
                     if c.card_id == card.chain_prereq:
-                        print("CHAINED")
                         self.money += 4
                         break
 
@@ -141,6 +142,10 @@ class Player:
 
     def get_built_wonder_count(self):
         return self.built_wonders
+
+    def built_library(self):
+        self.choose_science = True
+        self.choose_library_science = True
 
     def buy_card(self, card):
         card_cost = self.cards_total_cost(card)

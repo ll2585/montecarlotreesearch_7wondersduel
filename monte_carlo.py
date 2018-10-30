@@ -11,17 +11,19 @@ class MonteCarlo():
         self.game = game
         self.ucb1_explore_param = ucb1_explore_param
         self.nodes = {}
+        self.total_complexity = 0
 
     def get_move(self):
         root_state = self.game.get_state()
         current_player_id = root_state.current_player_id
         rootnode = Node()
         print("----")
-        #for i in range(1000):
-        timeout = .1
-        end = datetime.datetime.now() + datetime.timedelta(milliseconds=timeout * 1000)
 
-        while datetime.datetime.now() < end:
+        timeout = 3
+        end = datetime.datetime.now() + datetime.timedelta(milliseconds=timeout * 1000)
+        print(datetime.datetime.now())
+        #while datetime.datetime.now() < end:
+        for i in range(4000):
             node = rootnode
             state = root_state.clone_and_randomize(current_player_id)
 
@@ -32,6 +34,7 @@ class MonteCarlo():
                 simulated_game.do_move(node.move)
 
             #expand
+
             untried_moves = node.GetUntriedMoves(simulated_game.get_possible_moves())
             #print(untried_moves)
 
@@ -40,6 +43,7 @@ class MonteCarlo():
                 player = simulated_game.get_current_player_id()
                 simulated_game.do_move(m)
                 node = node.AddChild(m, player)  # add child and descend tree
+                print('new move', m)
 
             # Simulate
 
@@ -50,8 +54,9 @@ class MonteCarlo():
             while node != None:  # backpropagate from the expanded node and work back to the root node
                 node.Update(simulated_game)
                 node = node.parentNode
-
+        print(datetime.datetime.now())
         print(rootnode.ChildrenToString())
+        self.total_complexity += len(rootnode.childNodes)
 
         return max(rootnode.childNodes, key=lambda c: c.visits).move  # return the move that was most visited
 
